@@ -1,4 +1,13 @@
 /Kruskal_BRUTE
+/Articulation_points_TARJAN
+/Bellman_Ford
+/Bridges_TARJAN
+/Edmonds_karp
+/Eulerian_path
+/Ford_Fulkerson
+/Kruskal_UNION_FIND
+/tarjan_SCC
+/Kosaraju
 
 # Prerequisites
 *.d

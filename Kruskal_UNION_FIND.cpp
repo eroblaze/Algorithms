@@ -24,7 +24,7 @@ struct Compare_sort {
 	}
 };
 
-
+// Worse time complexity
 struct Union_Find {
 	vector<int> m_sets;
 	vector<int> m_sizes;
@@ -36,18 +36,18 @@ struct Union_Find {
 		fill(m_sizes.begin(), m_sizes.end(), 1);
 		iota(m_sets.begin(), m_sets.end(), 0);
 	}
-
+	// O(n)
 	int find(int a) const {
 		// Returns the representative of a set
 		int par = m_sets[a];
 		while (par != m_sets[par]) par = m_sets[par];
 		return par;
 	}
-
+	// O(n)
 	bool same(int a, int b) const {
 		return find(a) == find(b);
 	}
-
+	// O(n)
 	void merge(int a, int b, int weight) {
 		int rep_a = find(a);
 		int rep_b = find(b);
@@ -62,22 +62,77 @@ struct Union_Find {
 
 };
 
+// Has better time complexity - From 'Galen Colin'
+struct DSU {
+    int N{0};
+    VI m_sets;
+    VI m_sizes;
+    VVI adj;
+	int m_val{0};
+
+    DSU(int n):N(n+1) {
+        m_sets.resize(N);
+        iota(m_sets.begin(), m_sets.end(), 0);
+        m_sizes = VI(N, 1);
+        adj.resize(N);
+    }
+    // O(1)
+    int find (int a) {
+        assert(a < N);
+        return m_sets[a];
+    }
+    // O(1)
+    bool same(int a, int b) {
+        return find(a) == find(b);
+    }
+    // (n log(n))
+    void merge(int a, int b, int weight) {
+        if (same(a, b)) return;
+        int a_reps = m_sets[a];
+        int b_reps = m_sets[b];
+
+        // Make sure that a_reps variable contains the set or component with larger members
+        if (m_sizes[a_reps] < m_sizes[b_reps]) swap(a_reps, b_reps);
+        // I can also directly add
+        adj[a].push_back(b);
+        adj[b].push_back(a);
+
+        // Change all nodes in b_reps set to point to a_rep
+        m_dfs(b_reps, a_reps);
+        m_sizes[a] += m_sizes[b];
+        m_sizes[b] = 0;
+
+		m_val += weight;
+    }
+
+private:
+    void m_dfs(int node, int new_rep) {
+        if (m_sets[node] == new_rep) return;
+        m_sets[node] = new_rep;
+
+        for (auto v: adj[node]) {
+            m_dfs(v, new_rep);
+        }
+    }
+
+};
+
 
 void kruskal(priority_queue<tuple<int, int, int>, vector<tuple<int, int, int>>, Compare_sort> edge_list, int N) {
 
-	Union_Find obj(N);
+	// Union_Find obj(N);
+	DSU obj(N);
 	
 	while (!edge_list.empty()) {
 		tuple<int, int, int> edge = edge_list.top(); edge_list.pop();
 		int a,b,c;
 		tie(a,b,c) = edge;
 
-		if (!obj.same(a,b)) obj.merge(a,b,c);
+		if (!obj.same(a, b)) obj.merge(a,b,c);
 	}
 
 	int minimum_spanning_tree = obj.m_val;
 	db1(minimum_spanning_tree);
-
 }
 
 int main() {

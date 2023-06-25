@@ -21,29 +21,42 @@ void display_contents(const T&);
 
 const int N = 7;
 
-pair<deque<int>, int> find_augmented_path(const VVI& residual_graph, int source, int sink, bool vis[], pair<deque<int>, int>& path, int minimum_capacity=INT_MAX) {
-	// This is the major engine in the Ford-Fulkerson method
-	get<0>(path).push_back(source);
-	get<1>(path) = min(get<1>(path), minimum_capacity);
+pair<deque<int>, int> find_augmented_path_BFS_EDMONDS_KARP(const VVI& residual_graph, int source, int sink, bool vis[], pair<deque<int>, int>& path, int minimum_capacity=INT_MAX) {
+	int parent[N];
+	fill(parent, parent+N, -1);
+	bool found = false;
 
-	if (source == sink) {
-		return path;
-	}
+	queue<int> bfs;
+	bfs.push(source);
 
-	vis[source] = true;
+	while (!bfs.empty()) {
+		int node = bfs.front(); bfs.pop();
+		vis[node] = true;
 
-	for (int i = 1; i < N; ++i) {
-		int to = i, cap = residual_graph[source][i];
-		if (!vis[to] && cap > 0) {
-			pair<deque<int>, int> rv = find_augmented_path(residual_graph, to, sink, vis, path, cap);
-			if (get<0>(rv).size() > 0) {
-				return rv;
+		if (node == sink) {
+			found = true;
+			break;
+		}
+
+		for (int i = 1; i < N; ++i) {
+			if (!vis[i] && residual_graph[node][i] > 0) {
+				bfs.push(i);
+				parent[i] = node;
 			}
 		}
 	}
 
-	get<0>(path).pop_back();
-	return pair<deque<int>, int>();
+	pair<deque<int>, int> rv = {deque<int>(), INT_MAX};
+	if (found) {
+		while (sink != source) {
+			rv.first.push_front(sink);
+			rv.second = min(rv.second, residual_graph[parent[sink]][sink]);
+			sink = parent[sink];
+		}
+		rv.first.push_front(sink);
+	}
+
+	return rv;
 }
 
 int Ford_Fulkerson(const VVI& flow_network, int source, int sink) {
@@ -55,7 +68,7 @@ int Ford_Fulkerson(const VVI& flow_network, int source, int sink) {
 
 	bool vis[n] = {false};
 	pair<deque<int>, int> tmp_path = {deque<int>(), INT_MAX};
-	pair<deque<int>, int> augmented_path = find_augmented_path(residual_graph, source, sink, vis, tmp_path);
+	pair<deque<int>, int> augmented_path = find_augmented_path_BFS_EDMONDS_KARP(residual_graph, source, sink, vis, tmp_path);
 
 	while (get<0>(augmented_path).size() > 0) {
 		// Find the maximum flow of the augmenting path or the Minimum capacity of an edge in the path
@@ -77,7 +90,7 @@ int Ford_Fulkerson(const VVI& flow_network, int source, int sink) {
 		// cleanup
 		fill(vis, vis+n, false);
 		tmp_path = {deque<int>(), INT_MAX};
-		augmented_path = find_augmented_path(residual_graph, source, sink, vis, tmp_path);
+		augmented_path = find_augmented_path_BFS_EDMONDS_KARP(residual_graph, source, sink, vis, tmp_path);
 	}
 
 	return maximum_flow;
