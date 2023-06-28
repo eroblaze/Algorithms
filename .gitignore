@@ -8,6 +8,7 @@
 /Kruskal_UNION_FIND
 /tarjan_SCC
 /Kosaraju
+/Diameter_of_a_tree
 
 # Prerequisites
 *.d
