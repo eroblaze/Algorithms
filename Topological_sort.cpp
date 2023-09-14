@@ -39,6 +39,8 @@ bool dfs(int node, VVI adj, int state[]) {
 }
 
 void topological_sort(VVI adj) {
+    // This is topological sort using DFS
+    // There is another one using BFS called "Kahn's algorithm"
     int N = adj.size();
     int state[N] = {0};
 

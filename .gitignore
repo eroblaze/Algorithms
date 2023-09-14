@@ -9,6 +9,7 @@
 /tarjan_SCC
 /Kosaraju
 /Diameter_of_a_tree
+/Topological_sort
 
 # Prerequisites
 *.d
